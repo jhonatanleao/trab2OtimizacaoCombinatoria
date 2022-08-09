@@ -47,8 +47,9 @@ void geraVizinha();
 int verificaViabilidadeAtv(int idAtividade);
 void printSolucao2();
 int ajustaVetSucessor(int idTarefa, int tarefa);
-void heuBLMM();
+int heuBLMM();
 int estaNaMaquina(int idMaquina, int idTarefa);
-int encontraMaquina(int idMaquina, int idTarefa);
+int encontraMaquina(int idTarefa);
+int encontraId(int idTarefa);
 
 #endif // MAIN_HPP_INCLUDED

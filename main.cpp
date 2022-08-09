@@ -23,31 +23,24 @@ int main(int argc, char *argv[]){
     for(int i=0; i < qtdMaquinaUsada; i++){
         solucaoAux[i] = soluc[i];
     }
-    //ajusteVetPosAlocadas(1);
 
-    // for(int i=0; i < qtdvetAlocada; i++){
-    //     printf("%d ", vetAtivAlocadas[i]+1);
-    // }
-    // printf("\n");
+    
 
-    // flag2 = ajustaVetSucessor(12, 9);
-    // printf("%d\n", flag2);
-
-    for(int i=0; i < qtdMaquinaUsada; i++){
-        solucaoAux[i] = soluc[i];
-    }
-    for(int i=0; i < 1000000; i++){
-        geraVizinha();
-    }
+    //for(int i=0; i < 1000000; i++){
+    //    geraVizinha();
+    //}
+    //for(int i=0; i < 1000; i++){
+    //    heuBLMM();
+    //}
     heuBLMM();
-    printSolucao2();
+    printSolucao();
     
 }
 
 void lerArquivo()
 {
     int flag = 0, predecessor, sucessor;
-    FILE *f = fopen("GUNTHER.txt", "r");
+    FILE *f = fopen("BUXEY.txt", "r");
 
     fscanf(f, "%d", &qtdTarefas);
     
@@ -234,7 +227,9 @@ void printSolucao2(){
         
 
         printf("\n");
+		
     }
+	printf("FO: %d\n", FOSolucao);
 }
 
 int maiorPeso(){
@@ -350,9 +345,9 @@ int calculaFO(solucao s[MAX_REQ]){
     return maior;
 }
 
-void heuBLMM()
+int heuBLMM()
 {
-    int flag, flag2, i, j, idMaquina, contador =0;
+    int flag, flag2, i, j, idMaquina, idMaquinaOriginal, contador =0, idNaMaquina;
 
     for(int i=0; i < qtdMaquinaUsada; i++){
         solucaoAux[i] = soluc[i];
@@ -370,23 +365,20 @@ void heuBLMM()
             for (j = 0; j < qtdMaquinaUsada; j++)
             {
             	
-                idMaquina = encontraMaquina(j, i);
-                //printf("idMaquina: %d\n", idMaquina);
-                if (idMaquina != -1) // verificar se a tarefa não está na maquina que o for ta
+                idMaquina = estaNaMaquina(j, i);
+                if (idMaquina == -1) // verificar se a tarefa não está na maquina que o for ta
                 {
-                    //printf("%d\n", contador);
-                    
-					excluirTarefa(i, idMaquina);
+                    idMaquinaOriginal = encontraMaquina(i);
+                    idNaMaquina = encontraId(i);
+					excluirTarefa(idNaMaquina, idMaquinaOriginal);
 				    memset(&vetAtivAlocadas, 0, sizeof(vetAtivAlocadas));
-				    ajusteVetPosAlocadas(idMaquina);
+				    ajusteVetPosAlocadas(j);
 				    flag = verificaViabilidadeAtv(i);
 				    flag2 = ajustaVetSucessor(i, i);
-				    
-					if(flag == 1 && flag2 == 1){
+					if(flag == 1 && flag2 == 1){                 
 	                   	solucaoAux[j].atividadeAlocada[solucaoAux[j].qtdReqAlocada] = i;
-	                    solucaoAux[j].qtdReqAlocada++;
+                        solucaoAux[j].qtdReqAlocada++;
 	                    FOaux = calculaFO(solucaoAux);  
-	                    printf("FOaux: %d, FOMelhor: %d\n", FOaux, FOMelhor);
 	                    if (FOaux < FOMelhor && FOaux != 0)
 	                    {
 	                        printf("FOaux: %d, FOMelhor: %d\n", FOaux, FOMelhor);
@@ -396,24 +388,15 @@ void heuBLMM()
 	                        FOMelhor = FOaux;
 	                        flag = 1;
 	                    }
-					}
-                                        
-                    //excluirTarefa(i, idMaquina);
-                    //solucaoAux[j].atividadeAlocada[solucaoAux[j].qtdReqAlocada] = i;
-                    //solucaoAux[j].qtdReqAlocada++;
-                    //FOaux = calculaFO(solucaoAux);               
-                    // retiro a tarefa da maquina que ela ta e coloco na maquina que o for ta
-                    // calculo a FO e verifico se é menor e se é diferente de 0
-                    // se tiver um resultado melhor, eu mudo a flag para quando terminar, ele mudar a solução original
-                    // eu vou precisar criar mais uma estrutura de solução auxiliar.
-					
+					}				
                 }
-                //contador++;
+
             }
             for(int i=0; i < qtdMaquinaUsada; i++){
                 solucaoAux[i] = soluc[i];
             }
-            FOaux = FOSolucao;
+            FOaux = FOSolucao; 	
+
         }
         if (flag == 1)
         {
@@ -435,10 +418,24 @@ int estaNaMaquina(int idMaquina, int idTarefa){
     return -1;
 }
 
-int encontraMaquina(int idMaquina, int idTarefa){
-    for(int i =0; i < solucaoAux[idMaquina].qtdReqAlocada; i++){
-        if(solucaoAux[idMaquina].atividadeAlocada[i] == idTarefa)
-            return idMaquina;
+int encontraId(int idTarefa){
+    for (int i = 0; i < qtdMaquinaUsada; i++){
+        for(int j =0; j < solucaoAux[i].qtdReqAlocada; j++){
+            if(solucaoAux[i].atividadeAlocada[j] == idTarefa)
+                return j;
+        }        
     }
+
+    return -1;
+}
+
+int encontraMaquina(int idTarefa){
+    for (int i = 0; i < qtdMaquinaUsada; i++){
+        for(int j =0; j < solucaoAux[i].qtdReqAlocada; j++){
+            if(solucaoAux[i].atividadeAlocada[j] == idTarefa)
+                return i;
+        }        
+    }
+
     return -1;
 }
